@@ -9,6 +9,7 @@ using System.Net;
 using System.Xml.XPath;
 using System.Linq;
 using System.Windows.Input;
+using SteamAchievementCardManager.Models;
 
 namespace SteamAchievementCardManager.ViewModels;
 
@@ -16,6 +17,7 @@ public class MainWindowViewModel : ViewModelBase
 {
     private readonly SteamService _steamService;
     private readonly SteamGameService _steamGameService;
+    private readonly AppSettings _settings;
 
     private Client? _samClient;
 
@@ -93,7 +95,9 @@ public class MainWindowViewModel : ViewModelBase
         SteamId = _steamService.GetSteamId().ToString();
         SteamStatus = _steamService.GetPersonaStateString();
         SteamLevel = _steamService.GetSteamLevel();
-
+        // Carrega configurações salvas
+        _settings = SettingsService.Load();
+        _currentSortOrder = _settings.LastSortOrder;
         // Comando de ordenação
         SortCommand = new DelegateCommand<string>(param =>
         {
@@ -110,6 +114,10 @@ public class MainWindowViewModel : ViewModelBase
                     CurrentSortOrder = SortOrder.Native;
                     break;
             }
+
+            // Salva sempre que mudar a ordenação
+            _settings.LastSortOrder = CurrentSortOrder;
+            SettingsService.Save(_settings);
         });
 
         // Inicializa SAM
