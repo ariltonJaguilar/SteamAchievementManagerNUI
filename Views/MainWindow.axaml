@@ -93,26 +93,29 @@
                     <Grid Height="20" Background="Transparent" PointerPressed="TitleBar_PointerPressed" Margin="0,0,0,10">
                     </Grid>
                     <!-- Avatar + Nome -->
-                    <StackPanel Orientation="Horizontal" Margin="32,0,16,16" Spacing="10" Height="48">
-                        <Image Width="48" Height="48"
+                    <StackPanel Orientation="Vertical" Margin="16,0,16,16" Spacing="6" HorizontalAlignment="Center">
+                        <Image Width="64" Height="64"
                                Source="{Binding SteamAvatar}"
                                Stretch="UniformToFill">
                             <Image.Clip>
-                                <EllipseGeometry Center="24,24" RadiusX="24" RadiusY="24"/>
+                                <EllipseGeometry Center="32,32" RadiusX="32" RadiusY="32"/>
                             </Image.Clip>
                         </Image>
-                        <TextBlock VerticalAlignment="Center"
+                        <TextBlock HorizontalAlignment="Center"
                                    Foreground="White"
                                    FontWeight="Bold"
                                    Text="{Binding SteamUserName}"/>
                     </StackPanel>
-                    <Separator Margin="10"/>
-                    <!-- Botões de menu -->
-                    <StackPanel>
-                        <Button Content="Início" Margin="10"/>
-                        <Button Content="Meus Jogos" Margin="10"/>
-                        <Button Content="Conquistas" Margin="10"/>
-                    </StackPanel>
+           
+                    <TextBlock Text="{Binding SteamLevel, StringFormat='Nível {0}'}" 
+                               Foreground="LightGray"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               HorizontalAlignment="Center"/>
+
+
+
+                
                 </StackPanel>
             </Border>
 

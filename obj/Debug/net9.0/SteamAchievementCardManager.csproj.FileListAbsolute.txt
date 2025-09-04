@@ -79,3 +79,4 @@ D:\Projects\SteamAchievementCardManager\SteamAchievementCardManager\SteamAchieve
 D:\Projects\SteamAchievementCardManager\SteamAchievementCardManager\SteamAchievementCardManager\bin\Debug\net9.0\runtimes\osx-x86\lib\netstandard2.1\Steamworks.NET.dll
 D:\Projects\SteamAchievementCardManager\SteamAchievementCardManager\SteamAchievementCardManager\bin\Debug\net9.0\runtimes\win-x64\lib\netstandard2.1\Steamworks.NET.dll
 D:\Projects\SteamAchievementCardManager\SteamAchievementCardManager\SteamAchievementCardManager\bin\Debug\net9.0\runtimes\win-x86\lib\netstandard2.1\Steamworks.NET.dll
+D:\Projects\SteamAchievementCardManager\SteamAchievementCardManager\SteamAchievementCardManager\obj\Debug\net9.0\SteamAchievementCardManager.sourcelink.json

@@ -21,6 +21,12 @@ public class MainWindowViewModel : ViewModelBase
 
     public string SteamUserName { get; private set; }
     public Bitmap? SteamAvatar { get; private set; }
+    public string SteamId { get; private set; }
+    public string SteamStatus { get; private set; }
+    public int SteamLevel { get; private set; }
+    public string SteamLanguage { get; private set; }
+    public string? CurrentGame { get; private set; }
+    public int FriendsCount { get; private set; }
 
     // Lista completa de jogos
     public ObservableCollection<GameInfo> Games { get; } = new();
@@ -84,6 +90,9 @@ public class MainWindowViewModel : ViewModelBase
         _steamService = new SteamService();
         SteamUserName = _steamService.GetUserName();
         SteamAvatar = _steamService.GetUserAvatar();
+        SteamId = _steamService.GetSteamId().ToString();
+        SteamStatus = _steamService.GetPersonaStateString();
+        SteamLevel = _steamService.GetSteamLevel();
 
         // Comando de ordenação
         SortCommand = new DelegateCommand<string>(param =>

@@ -62,7 +62,31 @@ public class SteamService
         }
         return null;
     }
+    public CSteamID GetSteamId() => SteamUser.GetSteamID();
 
+    public EPersonaState GetPersonaState() => SteamFriends.GetPersonaState();
+
+    public int GetSteamLevel() => SteamUser.GetPlayerSteamLevel();
+
+
+    public string GetPersonaStateString()
+    {
+
+        var state = SteamFriends.GetPersonaState(); // retorna EPersonaState
+        return state switch
+        {
+            Steamworks.EPersonaState.k_EPersonaStateOffline => "Offline",
+            Steamworks.EPersonaState.k_EPersonaStateOnline => "Online",
+            Steamworks.EPersonaState.k_EPersonaStateBusy => "Ocupado",
+            Steamworks.EPersonaState.k_EPersonaStateAway => "Ausente",
+            Steamworks.EPersonaState.k_EPersonaStateSnooze => "Dormindo",
+            Steamworks.EPersonaState.k_EPersonaStateLookingToTrade => "Quer trocar",
+            Steamworks.EPersonaState.k_EPersonaStateLookingToPlay => "Quer jogar",
+            Steamworks.EPersonaState.k_EPersonaStateMax => "Desconhecido",
+            _ => "Desconhecido"
+        };
+    }
+    
     public void Shutdown()
     {
         if (_initialized)
