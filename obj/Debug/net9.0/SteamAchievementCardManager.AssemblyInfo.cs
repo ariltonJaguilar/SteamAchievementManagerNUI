@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SteamAchievementCardManager")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6aae6787887ef9e5798343a991af1ea6d327a355")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e8a7116a1cb4558ffb350a0c40efe40507d7ef6b")]
 [assembly: System.Reflection.AssemblyProductAttribute("SteamAchievementCardManager")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SteamAchievementCardManager")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

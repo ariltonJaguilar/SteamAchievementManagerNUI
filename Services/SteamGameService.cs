@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using SteamAchievementCardManager.Models;
 
 namespace SteamAchievementCardManager.Services;
 

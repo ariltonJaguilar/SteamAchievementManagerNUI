@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text.Json;
-using SteamAchievementCardManager.Models; // importa a classe AppSettings
+using SteamAchievementCardManager.Models;
 
 namespace SteamAchievementCardManager.Services
 {
@@ -9,10 +9,9 @@ namespace SteamAchievementCardManager.Services
     {
         private static readonly string FilePath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "SAM",              // pasta do seu app
-            "settings.json");   // arquivo de configurações
+            "SAM",              
+            "settings.json");
 
-        // Carrega as configurações salvas (ou cria padrão se não existir)
         public static AppSettings Load()
         {
             try

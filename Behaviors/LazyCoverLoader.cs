@@ -1,13 +1,13 @@
-﻿using Avalonia;
+﻿using System;
+using Avalonia;
 using Avalonia.Controls;
-using Avalonia.VisualTree;
 using Avalonia.Threading;
 using Avalonia.Media.Imaging;
-using System;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using SteamAchievementCardManager.Models;
 
 namespace SteamAchievementCardManager.Behaviors
 {
@@ -59,12 +59,8 @@ namespace SteamAchievementCardManager.Behaviors
         {
             if (sender is not Control control)
                 return;
-
-            // só carrega quando realmente visível
             control.PropertyChanged -= Control_PropertyChanged_IsVisible;
             control.PropertyChanged += Control_PropertyChanged_IsVisible;
-
-            // Se já estiver visível no momento do attach, tenta carregar
             if (control.IsVisible)
             {
                 _ = TryLoadAsync(control);
@@ -73,11 +69,18 @@ namespace SteamAchievementCardManager.Behaviors
 
         private static async void Control_PropertyChanged_IsVisible(object? sender, AvaloniaPropertyChangedEventArgs e)
         {
-            if (sender is Control control &&
-                e.Property == Visual.IsVisibleProperty &&
-                control.IsVisible)
+            try
             {
-                await TryLoadAsync(control);
+                if (sender is Control control &&
+                    e.Property == Visual.IsVisibleProperty &&
+                    control.IsVisible)
+                {
+                    await TryLoadAsync(control);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in Control_PropertyChanged_IsVisible: {ex}");
             }
         }
 
@@ -85,33 +88,51 @@ namespace SteamAchievementCardManager.Behaviors
         {
             if (control.DataContext is not GameInfo game)
                 return;
-
             if (game.Cover is not null || game.IsImageLoading)
                 return;
-
             if (string.IsNullOrWhiteSpace(game.CoverUrl))
                 return;
 
             game.IsImageLoading = true;
+            int maxRetries = 3;
+            int delayMs = 500;
 
             try
             {
                 await Gate.WaitAsync().ConfigureAwait(false);
 
-                var bytes = await Http.GetByteArrayAsync(game.CoverUrl).ConfigureAwait(false);
-                using var ms = new MemoryStream(bytes);
-                var bmp = new Bitmap(ms);
+                for (int attempt = 1; attempt <= maxRetries; attempt++)
+                {
+                    try
+                    {
+                        var bytes = await Http.GetByteArrayAsync(game.CoverUrl).ConfigureAwait(false);
+                        using var ms = new MemoryStream(bytes);
+                        var bmp = new Bitmap(ms);
 
-                await Dispatcher.UIThread.InvokeAsync(() => game.Cover = bmp);
-            }
-            catch
-            {
-                // Ignora falhas individuais
+                        await Dispatcher.UIThread.InvokeAsync(() => game.Cover = bmp);
+                        return; // sucesso, sai do método
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Fail to load async (attempt {attempt}/{maxRetries}) for URL: {game.CoverUrl}");
+                        Console.WriteLine($"Error: {ex.Message}");
+
+                        if (attempt < maxRetries)
+                            await Task.Delay(delayMs); // espera antes da próxima tentativa
+                    }
+                }
             }
             finally
             {
                 game.IsImageLoading = false;
-                try { Gate.Release(); } catch { }
+                try
+                {
+                    Gate.Release();
+                }
+                catch
+                {
+                    Console.WriteLine($"Fail to release semaphore for {game.Name}");
+                }
             }
         }
     }

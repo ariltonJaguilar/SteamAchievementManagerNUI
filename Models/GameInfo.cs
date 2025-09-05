@@ -2,24 +2,26 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
+namespace SteamAchievementCardManager.Models;
+
 public class GameInfo : INotifyPropertyChanged
 {
     public uint Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public string Type { get; set; } = "normal"; // normal, demo, mod, junk
+    public string Name { get; set; }
+    public string Type { get; set; }
     public string CoverUrl { get; set; } = string.Empty;
-    public string? FullCoverUrl { get; set; }    // nova capa para recentes
+    public string? FullCoverUrl { get; set; }
     private Bitmap? _fullCover;
     public Bitmap? FullCover
     {
         get => _fullCover;
         set
         {
-            if (_fullCover != value)
-            {
-                _fullCover = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FullCover)));
-            }
+            if (_fullCover == value)
+                return;
+
+            _fullCover = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FullCover)));
         }
     }
     private Bitmap? _icon;
@@ -28,11 +30,11 @@ public class GameInfo : INotifyPropertyChanged
         get => _icon;
         set
         {
-            if (_icon != value)
-            {
-                _icon = value;
-                OnPropertyChanged();
-            }
+            if (_icon == value)
+                return;
+
+            _icon = value;
+            OnPropertyChanged();
         }
     }
 
@@ -42,11 +44,11 @@ public class GameInfo : INotifyPropertyChanged
         get => _cover;
         set
         {
-            if (_cover != value)
-            {
-                _cover = value;
-                OnPropertyChanged();
-            }
+            if (_cover == value)
+                return;
+
+            _cover = value;
+            OnPropertyChanged();
         }
     }
 
@@ -56,13 +58,14 @@ public class GameInfo : INotifyPropertyChanged
         get => _isImageLoading;
         set
         {
-            if (_isImageLoading != value)
-            {
-                _isImageLoading = value;
-                OnPropertyChanged();
-            }
+            if (_isImageLoading == value)
+                return;
+
+            _isImageLoading = value;
+            OnPropertyChanged();
         }
     }
+
 
     private int _totalAchievements;
     public int TotalAchievements
@@ -70,12 +73,12 @@ public class GameInfo : INotifyPropertyChanged
         get => _totalAchievements;
         set
         {
-            if (_totalAchievements != value)
-            {
-                _totalAchievements = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(AchievementsLabel));
-            }
+            if (_totalAchievements == value)
+                return;
+
+            _totalAchievements = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(AchievementsLabel));
         }
     }
 
@@ -85,12 +88,12 @@ public class GameInfo : INotifyPropertyChanged
         get => _unlockedAchievements;
         set
         {
-            if (_unlockedAchievements != value)
-            {
-                _unlockedAchievements = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(AchievementsLabel));
-            }
+            if (_unlockedAchievements == value)
+                return;
+
+            _unlockedAchievements = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(AchievementsLabel));
         }
     }
 
@@ -100,11 +103,11 @@ public class GameInfo : INotifyPropertyChanged
         get => _isAchievementsLoading;
         set
         {
-            if (_isAchievementsLoading != value)
-            {
-                _isAchievementsLoading = value;
-                OnPropertyChanged();
-            }
+            if (_isAchievementsLoading == value)
+                return;
+
+            _isAchievementsLoading = value;
+            OnPropertyChanged();
         }
     }
 
@@ -119,6 +122,6 @@ public class GameInfo : INotifyPropertyChanged
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
-    protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }

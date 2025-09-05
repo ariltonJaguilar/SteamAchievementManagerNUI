@@ -10,6 +10,7 @@ using System.Xml.XPath;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using CommunityToolkit.Mvvm.Input;
 using SteamAchievementCardManager.Models;
 
 namespace SteamAchievementCardManager.ViewModels;
@@ -131,6 +132,8 @@ public class MainWindowViewModel : ViewModelBase
         SteamLevel = _steamService.GetSteamLevel();
         // Carrega configurações salvas
         _settings = SettingsService.Load();
+        _isGridView = _settings.IsGridView;
+
         _currentSortOrder = _settings.LastSortOrder;
         // Comando de ordenação
         RecentGames.CollectionChanged += (_, __) => OnPropertyChanged(nameof(RecentGames));
@@ -242,6 +245,27 @@ RefreshGamesCommand = new DelegateCommand<object>(async _ =>
             OnPropertyChanged(nameof(RecentGames));
         }
     }
+    private bool _isGridView;
+    public bool IsGridView
+    {
+        get => _isGridView;
+        set
+        {
+            if (_isGridView != value)
+            {
+                _isGridView = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+    public ICommand ToggleLayoutCommand => new RelayCommand(() =>
+    {
+        IsGridView = !IsGridView;
+
+        // Salva no settings
+        _settings.IsGridView = IsGridView;
+        SettingsService.Save(_settings);
+    });
 
 // Comando quando um jogo for clicado
     public ICommand GameClickedCommand { get; }
@@ -300,8 +324,8 @@ RefreshGamesCommand = new DelegateCommand<object>(async _ =>
                 }
 
                 // Define apenas a URL da capa
-                game.CoverUrl = $"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{appId}/capsule_184x69.jpg";
-            
+               // game.CoverUrl = $"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{appId}/capsule_184x69.jpg";
+               game.CoverUrl =  $"https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/{appId}/header.jpg";
                 // Capa completa para recentes
                 game.FullCoverUrl = $"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{appId}/library_600x900_2x.jpg";
                 Games.Add(game);

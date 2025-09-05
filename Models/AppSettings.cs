@@ -7,5 +7,6 @@ public class AppSettings
 {
     public MainWindowViewModel.SortOrder LastSortOrder { get; set; } = MainWindowViewModel.SortOrder.AZ;
     public List<uint> RecentGameIds { get; set; } = new List<uint>();
+    public bool IsGridView { get; set; } = false;
 
 }
