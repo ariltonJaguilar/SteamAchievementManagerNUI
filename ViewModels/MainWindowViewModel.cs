@@ -197,17 +197,25 @@ public class MainWindowViewModel : ViewModelBase
                 }
             }
         });
-RefreshGamesCommand = new DelegateCommand<object>(async _ =>
-{
-    // Atualiza a lista de jogos, mas não limpa RecentGames
-    Games.Clear();
-    FilteredGames.Clear();
+        RefreshGamesCommand = new DelegateCommand<object>(async _ =>
+        {
+            IsLoading = true; // começa o loading
 
-    await Task.Run(() => LoadGames());
+            try
+            {
+                Games.Clear();
+                FilteredGames.Clear();
 
-    // Apenas garante que os recentes estejam consistentes
-    LoadRecentGamesFromSettings();
-});
+                await Task.Run(() => LoadGames());
+
+                LoadRecentGamesFromSettings();
+            }
+            finally
+            {
+                IsLoading = false; // termina o loading
+            }
+        });
+
 
     }
 
@@ -338,6 +346,19 @@ RefreshGamesCommand = new DelegateCommand<object>(async _ =>
         LoadRecentGamesFromSettings();
         _ = LoadRecentGameCovers();
 
+    }
+    private bool _isLoading;
+    public bool IsLoading
+    {
+        get => _isLoading;
+        set
+        {
+            if (_isLoading != value)
+            {
+                _isLoading = value;
+                OnPropertyChanged(nameof(IsLoading));
+            }
+        }
     }
     private void LoadRecentGamesFromSettings()
     {

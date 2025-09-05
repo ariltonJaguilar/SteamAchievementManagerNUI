@@ -272,5 +272,16 @@
 
       </Grid>
     </Grid>
+    <!-- Overlay de loading -->
+    <Border Background="#80000000" 
+            IsVisible="{Binding IsLoading}" 
+            HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+            ZIndex="100" 
+            Grid.ColumnSpan="2" Grid.RowSpan="3">
+      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10">
+        <ProgressBar Width="150" Height="10" IsIndeterminate="True"/>
+        <TextBlock Text="Loading games..." Foreground="White" FontSize="16" HorizontalAlignment="Center"/>
+      </StackPanel>
+    </Border>
   </Grid>
 </Window>
