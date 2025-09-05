@@ -95,16 +95,7 @@
           <RowDefinition Height="*"/>    <!-- Lista de jogos -->
         </Grid.RowDefinitions>
 
-        <!-- Mensagem de erro -->
-        <TextBlock Grid.Row="0"
-                   Text="{Binding ErrorMessage}" 
-                   Foreground="Red"
-                   FontSize="18"
-                   HorizontalAlignment="Center"
-                   VerticalAlignment="Center"
-                   TextWrapping="Wrap"
-                   TextAlignment="Center"
-                   IsVisible="{Binding ErrorMessage, Converter={StaticResource NullToBoolConverter}}"/>
+       
 
         <!-- Barra de pesquisa e botões -->
         <Grid Grid.Row="0" Margin="20,10,10,10">
@@ -283,5 +274,26 @@
         <TextBlock Text="Loading games..." Foreground="White" FontSize="16" HorizontalAlignment="Center"/>
       </StackPanel>
     </Border>
+    <ExperimentalAcrylicBorder HorizontalAlignment="Right"
+                               VerticalAlignment="Bottom"
+                               Margin="20"
+                               IsVisible="{Binding HasError}"
+                               CornerRadius="12"
+                               Padding="16"
+                               MaxWidth="300"
+                               ZIndex="200">
+      <ExperimentalAcrylicBorder.Material>
+        <ExperimentalAcrylicMaterial TintColor="#8B0000"
+                                     TintOpacity="0.85"
+                                     MaterialOpacity="0.9"/>
+      </ExperimentalAcrylicBorder.Material>
+
+      <TextBlock Text="{Binding ErrorMessage}"
+                 Foreground="White"
+                 TextWrapping="Wrap"
+                 TextAlignment="Center"
+                 FontWeight="Bold"/>
+    </ExperimentalAcrylicBorder>
+
   </Grid>
 </Window>

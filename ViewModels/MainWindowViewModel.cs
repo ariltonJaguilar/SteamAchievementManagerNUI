@@ -231,15 +231,17 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (ClientInitializeException e)
         {
-            ErrorMessage = "Steam não está rodando.\nAbra o Steam e tente novamente.\n\n" + e.Message;
+            ErrorMessage = "Steam is not running. Please open Steam and try again.";
+
+           // ErrorMessage = "Steam não está rodando.\nAbra o Steam e tente novamente.\n\n" + e.Message;
         }
         catch (DllNotFoundException)
         {
-            ErrorMessage = "DLL do Steam não encontrada!";
+            ErrorMessage = "DLL not found";
         }
         catch (Exception e)
         {
-            ErrorMessage = "Erro desconhecido: " + e.Message;
+            ErrorMessage = "Unknow error: " + e.Message;
         }
     }
 // Lista de últimos 5 jogos clicados
@@ -304,7 +306,9 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception e)
         {
-            ErrorMessage = "Não foi possível baixar a lista de jogos SAM.\n" + e.Message;
+            ErrorMessage = "Unable to download the game list.";
+
+           // ErrorMessage = "Não foi possível baixar a lista de jogos SAM.\n" + e.Message;
             return;
         }
 
@@ -418,8 +422,30 @@ public class MainWindowViewModel : ViewModelBase
         private set
         {
             _errorMessage = value;
-            OnPropertyChanged(nameof(ErrorMessage));
+            OnPropertyChanged();
+            HasError = !string.IsNullOrWhiteSpace(value);
+
+            if (HasError)
+                StartErrorTimer();
         }
+    }
+    private bool _hasError;
+    public bool HasError
+    {
+        get => _hasError;
+        set
+        {
+            if (_hasError != value)
+            {
+                _hasError = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+    private async void StartErrorTimer()
+    {
+        await Task.Delay(4000); // fica visível 4 segundos
+        HasError = false;
     }
 
     // Comando auxiliar simples
