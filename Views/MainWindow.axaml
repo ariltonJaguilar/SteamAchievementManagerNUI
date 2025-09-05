@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:behaviors="using:SteamAchievementCardManager.Behaviors"
+        xmlns:converters="clr-namespace:SteamAchievementCardManager.Converters"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="SteamAchievementCardManager.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
@@ -11,6 +12,7 @@
         Title="Steam Achievements and Cards Manager"
         TransparencyLevelHint="AcrylicBlur"
         Background="Transparent"
+        x:Name="RootWindow"
         ExtendClientAreaToDecorationsHint="True">
 
     <Design.DataContext>
@@ -24,6 +26,8 @@
         <SolidColorBrush x:Key="TextControlBorderBrushPointerOver" Color="Transparent"/>
         <SolidColorBrush x:Key="TextControlBackgroundFocused" Color="Transparent"/>
         <SolidColorBrush x:Key="TextControlBorderBrushFocused" Color="Transparent"/>
+        <converters:RecentGamesToVisibilityConverter x:Key="RecentGamesToVisibilityConverter"/>
+
     </Window.Resources>
     <Window.Styles>
         <Style Selector="TextBox.search">
@@ -122,8 +126,9 @@
             <!-- Conteúdo principal -->
             <Grid Grid.Column="1" Margin="0,48,0,0">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>   <!-- Barra de pesquisa -->
+                    <RowDefinition Height="Auto"/>   <!-- Recentes -->
+                    <RowDefinition Height="*"/>      <!-- Lista de jogos -->
                 </Grid.RowDefinitions>
                 
                 <!-- Se houver erro -->
@@ -141,6 +146,7 @@
                 <Grid Grid.Row="0" Margin="20,10,10,10">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
@@ -193,7 +199,7 @@
                             HorizontalAlignment="Stretch"
                             VerticalAlignment="Stretch"
                             Padding="0"
-                            ToolTip.Tip="Ordenar">
+                            ToolTip.Tip="Order by">
                                 <Button.Content>
                                     <Path
                                         Width="20"
@@ -217,22 +223,91 @@
                                 </Button.Flyout>
                             </Button>
                     </ExperimentalAcrylicBorder>
+                    <!-- Botão de refresh na coluna 2 -->
+                    <ExperimentalAcrylicBorder Grid.Column="2"
+                                               CornerRadius="12"
+                                               Width="44"
+                                               Height="44"
+                                               Margin="10,0,0,0"
+                                               VerticalAlignment="Center"
+                                               ClipToBounds="True">
+                        <ExperimentalAcrylicBorder.Material>
+                            <ExperimentalAcrylicMaterial TintColor="Black" TintOpacity="0.35"/>
+                        </ExperimentalAcrylicBorder.Material>
+
+                        <Button Command="{Binding RefreshGamesCommand}"
+                                Background="Transparent"
+                                BorderBrush="Transparent"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                ToolTip.Tip="Refresh">
+                            <Button.Content>
+                                <Path
+                                    Width="20"
+                                    Height="20"
+                                    Stretch="Uniform"
+                                    Fill="SlateGray"
+                                    Data="M552 256L408 256C398.3 256 389.5 250.2 385.8 241.2C382.1 232.2 384.1 221.9 391 215L437.7 168.3C362.4 109.7 253.4 115 184.2 184.2C109.2 259.2 109.2 380.7 184.2 455.7C259.2 530.7 380.7 530.7 455.7 455.7C463.9 447.5 471.2 438.8 477.6 429.6C487.7 415.1 507.7 411.6 522.2 421.7C536.7 431.8 540.2 451.8 530.1 466.3C521.6 478.5 511.9 490.1 501 501C401 601 238.9 601 139 501C39.1 401 39 239 139 139C233.3 44.7 382.7 39.4 483.3 122.8L535 71C541.9 64.1 552.2 62.1 561.2 65.8C570.2 69.5 576 78.3 576 88L576 232C576 245.3 565.3 256 552 256z"/>
+                            </Button.Content>
+                        </Button>
+                    </ExperimentalAcrylicBorder>
                 </Grid>
 
-                <!-- Lista de jogos -->
-                <ListBox Grid.Row="1"
+                <!-- Recentes — só aparece se houver itens -->
+                <StackPanel Grid.Row="1"
+                            Margin="20,10,10,10"
+                            Orientation="Vertical"
+                            Spacing="4"
+                            IsVisible="{Binding RecentGames, Converter={StaticResource RecentGamesToVisibilityConverter}}">
+                    <TextBlock Text="Recents"
+                               FontSize="14"
+                               Margin="0,0,0,10"
+                               FontWeight="SemiBold"
+                               Foreground="DarkGray"/>
+
+                    <ItemsControl ItemsSource="{Binding RecentGames}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="8"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Command="{Binding DataContext.GameClickedCommand, ElementName=RootWindow}"
+                                        CommandParameter="{Binding}"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Padding="0"
+                                        Margin="0,0,8,0">
+                                    <Border Width="80" Height="120" CornerRadius="6" ClipToBounds="True" Background="#22000000">
+                                        <Image Source="{Binding FullCover}" Stretch="Uniform"/>
+                                    </Border>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+
+
+               <!-- Lista de jogos -->
+                
+                <ListBox Grid.Row="2"
                          ItemsSource="{Binding FilteredGames}"
                          Background="Transparent"
                          Foreground="White"
-                         IsVisible="{Binding ErrorMessage, Converter={StaticResource NullToBoolConverter}, ConverterParameter=Invert}" >
+                         SelectionMode="Single"
+                         SelectedItem="{Binding SelectedGame, Mode=TwoWay}"
+                         IsVisible="{Binding ErrorMessage, Converter={StaticResource NullToBoolConverter}, ConverterParameter=Invert}">
                     <ListBox.ItemsPanel>
                         <ItemsPanelTemplate>
                             <VirtualizingStackPanel/>
                         </ItemsPanelTemplate>
                     </ListBox.ItemsPanel>
+
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel Orientation="Horizontal" Spacing="10" Margin="8,6">
+                            <Grid ColumnDefinitions="Auto,*" Margin="8,6">
                                 <Border Width="96" Height="36" CornerRadius="6" ClipToBounds="True" Background="#22000000">
                                     <Image Source="{Binding Cover}"
                                            Stretch="Uniform"
@@ -240,7 +315,11 @@
                                            VerticalAlignment="Center"
                                            behaviors:LazyCoverLoader.IsEnabled="True"/>
                                 </Border>
-                                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <StackPanel Grid.Column="1"
+                                            Orientation="Horizontal"
+                                            Spacing="8"
+                                            VerticalAlignment="Center"
+                                            Margin="10,0,0,0">
                                     <TextBlock Text="{Binding Name}"
                                                VerticalAlignment="Center"
                                                Foreground="White"
@@ -251,10 +330,13 @@
                                                FontSize="13"
                                                Margin="6,0,0,0"/>
                                 </StackPanel>
-                            </StackPanel>
+                            </Grid>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
+
+
+
             </Grid>
         </Grid>
     </Grid>

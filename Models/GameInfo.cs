@@ -8,7 +8,20 @@ public class GameInfo : INotifyPropertyChanged
     public string Name { get; set; } = string.Empty;
     public string Type { get; set; } = "normal"; // normal, demo, mod, junk
     public string CoverUrl { get; set; } = string.Empty;
-
+    public string? FullCoverUrl { get; set; }    // nova capa para recentes
+    private Bitmap? _fullCover;
+    public Bitmap? FullCover
+    {
+        get => _fullCover;
+        set
+        {
+            if (_fullCover != value)
+            {
+                _fullCover = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FullCover)));
+            }
+        }
+    }
     private Bitmap? _icon;
     public Bitmap? Icon
     {

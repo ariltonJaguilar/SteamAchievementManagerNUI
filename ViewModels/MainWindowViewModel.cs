@@ -8,6 +8,7 @@ using System.IO;
 using System.Net;
 using System.Xml.XPath;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using SteamAchievementCardManager.Models;
 
@@ -85,6 +86,39 @@ public class MainWindowViewModel : ViewModelBase
     }
 
     public ICommand SortCommand { get; }
+    private GameInfo? _selectedGame;
+    public GameInfo? SelectedGame
+    {
+        get => _selectedGame;
+        set
+        {
+            if (SetProperty(ref _selectedGame, value) && value != null)
+            {
+                GameClickedCommand.Execute(value);
+            }
+        }
+    }
+    private async Task LoadRecentGameCovers()
+    {
+        foreach (var game in RecentGames)
+        {
+            if (game.FullCover == null && !string.IsNullOrEmpty(game.FullCoverUrl))
+            {
+                try
+                {
+                    using var webClient = new WebClient();
+                    var data = await webClient.DownloadDataTaskAsync(game.FullCoverUrl);
+                    using var ms = new MemoryStream(data);
+                    game.FullCover = Bitmap.DecodeToWidth(ms, 96);
+                }
+                catch
+                {
+                    game.FullCover = null;
+                }
+            }
+        }
+    }
+    public ICommand RefreshGamesCommand { get; }
 
     public MainWindowViewModel()
     {
@@ -99,6 +133,8 @@ public class MainWindowViewModel : ViewModelBase
         _settings = SettingsService.Load();
         _currentSortOrder = _settings.LastSortOrder;
         // Comando de ordenação
+        RecentGames.CollectionChanged += (_, __) => OnPropertyChanged(nameof(RecentGames));
+
         SortCommand = new DelegateCommand<string>(param =>
         {
             switch (param?.ToUpperInvariant())
@@ -122,6 +158,54 @@ public class MainWindowViewModel : ViewModelBase
 
         // Inicializa SAM
         InitSAM();
+        
+        GameClickedCommand = new DelegateCommand<GameInfo>(async game =>
+        {
+            if (game == null) return;
+
+            // Remove se já estiver na lista
+            if (RecentGames.Contains(game))
+                RecentGames.Remove(game);
+
+            // Adiciona no início
+            RecentGames.Insert(0, game);
+
+            // Limita a 5 itens
+            while (RecentGames.Count > 5)
+                RecentGames.RemoveAt(5);
+
+            // Atualiza AppSettings
+            _settings.RecentGameIds = RecentGames.Select(g => g.Id).ToList();
+            SettingsService.Save(_settings);
+
+            // Baixa a capa completa em tempo real
+            if (game.FullCover == null)
+            {
+                try
+                {
+                    using var webClient = new WebClient();
+                    var data = await webClient.DownloadDataTaskAsync(game.FullCoverUrl);
+                    using var ms = new MemoryStream(data);
+                    game.FullCover = Bitmap.DecodeToWidth(ms, 96);
+                }
+                catch
+                {
+                    game.FullCover = null;
+                }
+            }
+        });
+RefreshGamesCommand = new DelegateCommand<object>(async _ =>
+{
+    // Atualiza a lista de jogos, mas não limpa RecentGames
+    Games.Clear();
+    FilteredGames.Clear();
+
+    await Task.Run(() => LoadGames());
+
+    // Apenas garante que os recentes estejam consistentes
+    LoadRecentGamesFromSettings();
+});
+
     }
 
     private void InitSAM()
@@ -147,7 +231,20 @@ public class MainWindowViewModel : ViewModelBase
             ErrorMessage = "Erro desconhecido: " + e.Message;
         }
     }
+// Lista de últimos 5 jogos clicados
+    private ObservableCollection<GameInfo> _recentGames = new();
+    public ObservableCollection<GameInfo> RecentGames
+    {
+        get => _recentGames;
+        private set
+        {
+            _recentGames = value;
+            OnPropertyChanged(nameof(RecentGames));
+        }
+    }
 
+// Comando quando um jogo for clicado
+    public ICommand GameClickedCommand { get; }
     private void LoadGames()
     {
         if (_samClient == null)
@@ -204,13 +301,37 @@ public class MainWindowViewModel : ViewModelBase
 
                 // Define apenas a URL da capa
                 game.CoverUrl = $"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{appId}/capsule_184x69.jpg";
-
+            
+                // Capa completa para recentes
+                game.FullCoverUrl = $"https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/{appId}/library_600x900_2x.jpg";
                 Games.Add(game);
             }
         }
 
         // Inicializa lista filtrada com todos os jogos
         UpdateFilteredGames();
+        // Carrega recentes do AppSettings
+        LoadRecentGamesFromSettings();
+        _ = LoadRecentGameCovers();
+
+    }
+    private void LoadRecentGamesFromSettings()
+    {
+        if (_settings.RecentGameIds == null || _settings.RecentGameIds.Count == 0)
+            return;
+
+        // Só adiciona jogos que ainda não estão na lista
+        foreach (var id in _settings.RecentGameIds)
+        {
+            if (RecentGames.Any(g => g.Id == id))
+                continue;
+
+            var game = Games.FirstOrDefault(g => g.Id == id);
+            if (game != null)
+            {
+                RecentGames.Add(game);
+            }
+        }
     }
 
     private void UpdateFilteredGames()
